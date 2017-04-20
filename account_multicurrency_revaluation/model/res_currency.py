@@ -21,8 +21,8 @@
 
 import time
 
-from openerp import models, api, _
-from openerp.exceptions import Warning
+from odoo import models, api, _
+from odoo.exceptions import Warning as UserError
 
 
 class ResCurrency(models.Model):
@@ -36,7 +36,7 @@ class ResCurrency(models.Model):
             rate = from_currency.rate
             if rate == 0.0:
                 date = context.get('date', time.strftime('%Y-%m-%d'))
-                raise Warning(
+                raise UserError(
                     _('No rate found '
                       'for the currency: %s '
                       'at the date: %s') %
