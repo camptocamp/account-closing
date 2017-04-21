@@ -19,36 +19,35 @@
 #
 ##############################################################################
 
-from openerp.osv import fields, orm
+from openerp import models, api, fields
 
 
-class UnrealizedCurrencyReportPrinter(orm.TransientModel):
+class UnrealizedCurrencyReportPrinter(models.TransientModel):
     _name = "unrealized.report.printer"
 
-    _columns = {
-        'chart_account_id': fields.many2one(
-            'account.account', 'Chart root',
-            domain=[('parent_id', '=', False)],
-            required=True),
-        'period_id': fields.many2one(
-            'account.period', 'Period to use', required=True),
-    }
+    account_ids = fields.Many2many(
+        'account.account',
+        string='Accounts (leave blank to select all)',
+        domain="[('currency_revaluation', '=', True)]"
+    )
 
-    def print_report(self, cursor, uid, wid, data, context=None):
+    @api.multi
+    def print_report(self, data):
         """
         Show the report
         """
-        context = context or {}
-        # we update form with display account value
-        if isinstance(wid, list):
-            wid = wid[0]
-        current = self.browse(cursor, uid, wid, context=context)
         form = {}
-        form['period_id'] = current.period_id.id
-        form['period_name'] = current.period_id.name
-        form['account_ids'] = [current.chart_account_id.id]
+
+        if not self.account_ids:
+            form['account_ids'] = self.env['account.account'].search([
+                ('currency_revaluation', '=', True)
+            ]).ids
+        else:
+            form['account_ids'] = self.account_ids.ids
+
         data['form'] = form
 
         return {'type': 'ir.actions.report.xml',
-                'report_name': 'currency_unrealized',
+                'report_name':
+                    'account_multicurrency_revaluation_report.curr_unrealized',
                 'datas': data}
