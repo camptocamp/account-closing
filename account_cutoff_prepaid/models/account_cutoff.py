@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# © 2013-2016 Akretion (Alexis de Lattre <alexis.delattre@akretion.com>)
+# Copyright 2016 Akretion (Alexis de Lattre <alexis.delattre@akretion.com>)
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from odoo import models, fields, api, _
@@ -12,7 +11,7 @@ class AccountCutoff(models.Model):
     @api.model
     def _get_default_source_journals(self):
         res = []
-        cutoff_type = self._context.get('type')
+        cutoff_type = self.env.context.get('type')
         mapping = {
             'prepaid_expense': 'purchase',
             'prepaid_revenue': 'sale',
@@ -27,7 +26,7 @@ class AccountCutoff(models.Model):
     source_journal_ids = fields.Many2many(
         'account.journal', column1='cutoff_id', column2='journal_id',
         string='Source Journals', readonly=True,
-        default=_get_default_source_journals,
+        default=lambda self: self._get_default_source_journals(),
         states={'draft': [('readonly', False)]})
     forecast = fields.Boolean(
         string='Forecast',
@@ -42,7 +41,7 @@ class AccountCutoff(models.Model):
         'unique('
         'cutoff_date, company_id, type, forecast, start_date, end_date)',
         'A cut-off of the same type already exists with the same date(s) !'
-        )]
+    )]
 
     @api.multi
     @api.constrains('start_date', 'end_date', 'forecast')
@@ -54,7 +53,7 @@ class AccountCutoff(models.Model):
                     'The start date is after the end date!'))
 
     @api.onchange('forecast')
-    def forecast_onchange(self):
+    def onchange_forecast(self):
         return {'warning': {
             'title': _('Warning'),
             'message': _(
@@ -110,7 +109,7 @@ class AccountCutoff(models.Model):
             'amount': aml.credit - aml.debit,
             'currency_id': self.company_currency_id.id,
             'cutoff_amount': cutoff_amount,
-            }
+        }
         return res
 
     @api.multi
@@ -151,10 +150,10 @@ class AccountCutoff(models.Model):
         return True
 
     @api.model
-    def _inherit_default_cutoff_account_id(self):
-        account_id = super(AccountCutoff, self).\
-            _inherit_default_cutoff_account_id()
-        cutoff_type = self._context.get('type')
+    # def _inherit_default_cutoff_account_id(self):
+    def _default_cutoff_account_id(self):
+        account_id = super()._inherit_default_cutoff_account_id()
+        cutoff_type = self.env.context.get('type')
         company = self.env.user.company_id
         if cutoff_type == 'prepaid_revenue':
             account_id = company.default_prepaid_revenue_account_id.id or False

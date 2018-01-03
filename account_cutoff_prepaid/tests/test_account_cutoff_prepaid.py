@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
-# © 2014 ACSONE SA/NV (http://acsone.eu)
+# Copyright 2014 ACSONE SA/NV (http://acsone.eu)
 # @author Stéphane Bidoul <stephane.bidoul@acsone.eu>
-# © 2016 Akretion (Alexis de Lattre <alexis.delattre@akretion.com>)
+# Copyright 2016 Akretion (Alexis de Lattre <alexis.delattre@akretion.com>)
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 
@@ -13,7 +12,7 @@ from odoo.tests.common import TransactionCase
 class TestCutoffPrepaid(TransactionCase):
 
     def setUp(self):
-        super(TestCutoffPrepaid, self).setUp()
+        super().setUp()
         self.inv_model = self.env['account.invoice']
         self.cutoff_model = self.env['account.cutoff']
         self.account_model = self.env['account.account']
@@ -74,7 +73,7 @@ class TestCutoffPrepaid(TransactionCase):
         })
         return cutoff
 
-    def test_0(self):
+    def test_with_cutoff_before_after_and_in_the_middle(self):
         """ basic test with cutoff before, after and in the middle """
         amount = self._days('04-01', '06-30')
         amount_2months = self._days('05-01', '06-30')
@@ -107,7 +106,7 @@ class TestCutoffPrepaid(TransactionCase):
         cutoff.get_prepaid_lines()
         cutoff.create_move()
         self.assertEqual(amount * 2, cutoff.total_cutoff_amount)
-        self.assert_(cutoff.move_id, "move not generated")
+        self.assertTrue(cutoff.move_id, "move not generated")
         # two invoices, but two lines (because the two cutoff lines
         # have been grouped into one line plus one counterpart)
         self.assertEqual(len(cutoff.move_id.line_ids), 2)
