@@ -39,7 +39,7 @@ class AccountCutoff(models.Model):
     _sql_constraints = [(
         'date_type_forecast_company_uniq',
         'unique('
-        'cutoff_date, company_id, type, forecast, start_date, end_date)',
+        'cutoff_date, company_id, cutoff_type, forecast, start_date, end_date)',
         'A cut-off of the same type already exists with the same date(s) !'
     )]
 
@@ -142,7 +142,10 @@ class AccountCutoff(models.Model):
         # Search for account move lines in the source journals
         amls = aml_obj.search(domain)
         # Create mapping dict
-        mapping = mapping_obj._get_mapping_dict(self.company_id.id, self.type)
+        mapping = mapping_obj._get_mapping_dict(
+            self.company_id.id,
+            self.cutoff_type
+        )
 
         # Loop on selected account move lines to create the cutoff lines
         for aml in amls:
@@ -150,9 +153,8 @@ class AccountCutoff(models.Model):
         return True
 
     @api.model
-    # def _inherit_default_cutoff_account_id(self):
     def _default_cutoff_account_id(self):
-        account_id = super()._inherit_default_cutoff_account_id()
+        account_id = super()._default_cutoff_account_id()
         cutoff_type = self.env.context.get('type')
         company = self.env.user.company_id
         if cutoff_type == 'prepaid_revenue':

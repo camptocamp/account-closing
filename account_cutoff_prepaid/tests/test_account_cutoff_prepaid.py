@@ -6,32 +6,33 @@
 
 import time
 from odoo import fields
-from odoo.tests.common import TransactionCase
+from odoo.tests.common import SavepointCase
 
 
-class TestCutoffPrepaid(TransactionCase):
+class TestCutoffPrepaid(SavepointCase):
 
-    def setUp(self):
-        super().setUp()
-        self.inv_model = self.env['account.invoice']
-        self.cutoff_model = self.env['account.cutoff']
-        self.account_model = self.env['account.account']
-        self.journal_model = self.env['account.journal']
-        self.account_expense = self.account_model.search([(
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.inv_model = cls.env['account.invoice']
+        cls.cutoff_model = cls.env['account.cutoff']
+        cls.account_model = cls.env['account.account']
+        cls.journal_model = cls.env['account.journal']
+        cls.account_expense = cls.account_model.search([(
             'user_type_id',
             '=',
-            self.env.ref('account.data_account_type_expenses').id)], limit=1)
-        self.account_payable = self.account_model.search([(
+            cls.env.ref('account.data_account_type_expenses').id)], limit=1)
+        cls.account_payable = cls.account_model.search([(
             'user_type_id',
             '=',
-            self.env.ref('account.data_account_type_payable').id)], limit=1)
-        self.account_cutoff = self.account_model.search([(
+            cls.env.ref('account.data_account_type_payable').id)], limit=1)
+        cls.account_cutoff = cls.account_model.search([(
             'user_type_id',
             '=',
-            self.env.ref('account.data_account_type_current_liabilities').id)],
+            cls.env.ref('account.data_account_type_current_liabilities').id)],
             limit=1)
-        self.cutoff_journal = self.journal_model.search([], limit=1)
-        self.purchase_journal = self.journal_model.search([(
+        cls.cutoff_journal = cls.journal_model.search([], limit=1)
+        cls.purchase_journal = cls.journal_model.search([(
             'type', '=', 'purchase')], limit=1)
 
     def _date(self, date):
@@ -66,7 +67,7 @@ class TestCutoffPrepaid(TransactionCase):
     def _create_cutoff(self, date):
         cutoff = self.cutoff_model.create({
             'cutoff_date': self._date(date),
-            'type': 'prepaid_revenue',
+            'cutoff_type': 'prepaid_revenue',
             'cutoff_journal_id': self.cutoff_journal.id,
             'cutoff_account_id': self.account_cutoff.id,
             'source_journal_ids': [(6, 0, [self.purchase_journal.id])],
