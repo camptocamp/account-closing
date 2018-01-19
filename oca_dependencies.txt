@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # List the OCA project dependencies, one per line
 # Add a repository url and branch if you need a forked version
 #
@@ -17,3 +18,6 @@
 account-closing https://github.com/oleksandrpaziuk/account-closing 11.0-mig-account_cutoff_base
 account-closing https://github.com/oleksandrpaziuk/account-closing 11.0-mig-account_invoice_start_end_dates
 
+# list the OCA project dependencies, one per line
+# add a github url if you need a forked version
+account-financial-tools
