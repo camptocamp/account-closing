@@ -13,6 +13,7 @@
         'views/account_cutoff.xml',
         'views/company.xml',
         'views/stock_location.xml',
+        'data/ir_cron.xml',
     ],
     'installable': True,
     'application': True,
