@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 # Copyright 2013-2018 Akretion (http://www.akretion.com)
+<<<<<<< b0f8b56e679c428699c4da55131fff4f1159a157
 # Copyright 2017 ACSONE SA/NV
+=======
+>>>>>>> Move auto-reversal to base module.
 # Copyright 2018 Jacques-Etienne Baudoux (BCIM sprl) <je@bcim.be>
 # @author Alexis de Lattre <alexis.delattre@akretion.com>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
@@ -29,6 +32,11 @@ class ResCompany(models.Model):
     default_accrued_expense_return_account_id = fields.Many2one(
         comodel_name='account.account',
         string='Default Account for Accrued Expenses Returns',
+        domain=[('deprecated', '=', False)])
+
+    default_accrued_expense_prepayment_account_id = fields.Many2one(
+        comodel_name='account.account',
+        string='Default Account for Accrued Prepaid Expenses',
         domain=[('deprecated', '=', False)])
 
     default_accrual_revenue_journal_id = fields.Many2one(
