@@ -10,6 +10,8 @@ class AccountInvoiceLine(models.Model):
     _inherit = 'account.invoice.line'
 
     def _update_cutoff_expense(self):
+        if not self:
+            return
         # Look for lines where cutoff is missing or needs to be update
         self.env.cr.execute("""
             SELECT ail.id,
