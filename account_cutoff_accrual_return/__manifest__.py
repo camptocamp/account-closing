@@ -11,7 +11,6 @@
     'depends': ['account_cutoff_accrual_base', 'stock'],
     'data': [
         'views/account_cutoff.xml',
-        'views/company.xml',
         'views/stock_location.xml',
         'data/ir_cron.xml',
     ],

@@ -14,11 +14,10 @@ class AccountCutoff(models.Model):
         ])
 
     @api.model
-    def _inherit_default_cutoff_account_id(self):
+    def _default_cutoff_account_id(self):
         """ Set up default account for a new cutoff """
-        account_id = super(AccountCutoff,
-                           self)._inherit_default_cutoff_account_id()
-        type_cutoff = self.env.context.get('type')
+        account_id = super(AccountCutoff, self)._default_cutoff_account_id()
+        type_cutoff = self.env.context.get('default_type')
         company = self.env.user.company_id
         if type_cutoff == 'accrued_expense_return':
             account_id = company.default_accrued_expense_return_account_id.id or False
@@ -28,17 +27,15 @@ class AccountCutoff(models.Model):
 
     @api.model
     def _get_default_journal(self):
-        journal_id = super(AccountCutOff, self)._get_default_journal()
-        cutoff_type = self.env.context.get('type', False)
-        default_journal_id = self.env.user.company_id\
-            .default_cutoff_journal_id.id or False
+        journal = super(AccountCutoff, self)._get_default_journal()
+        cutoff_type = self.env.context.get('default_type', False)
         if cutoff_type == 'accrued_expense_return':
-            journal_id = self.env.user.company_id\
-                .default_accrual_expense_journal_id.id or default_journal_id
+            journal = self.env.user.company_id\
+                .default_accrual_expense_journal_id.id or journal
         elif cutoff_type == 'accrued_revenue_return':
-            journal_id = self.env.user.company_id\
-                .default_accrual_revenue_journal_id.id or default_journal_id
-        return journal_id
+            journal = self.env.user.company_id\
+                .default_accrual_revenue_journal_id.id or journal
+        return journal
 
     @api.onchange('type')
     def _onchange_type(self):
