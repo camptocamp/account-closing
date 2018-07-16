@@ -8,6 +8,7 @@
     'category': 'Accounting & Finance',
     'license': 'AGPL-3',
     'summary': 'Accrued Expense & Accrued Revenue from Return Pickings',
+    'author': "BCIM,Odoo Community Association (OCA)",
     'depends': ['account_cutoff_accrual_base', 'stock'],
     'data': [
         'views/account_cutoff.xml',
