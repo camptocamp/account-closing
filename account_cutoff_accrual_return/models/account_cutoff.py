@@ -20,9 +20,11 @@ class AccountCutoff(models.Model):
         type_cutoff = self.env.context.get('default_type')
         company = self.env.user.company_id
         if type_cutoff == 'accrued_expense_return':
-            account_id = company.default_accrued_expense_return_account_id.id or False
+            account_id = company.default_accrued_expense_return_account_id.id\
+                or False
         elif type_cutoff == 'accrued_revenue_return':
-            account_id = company.default_accrued_revenue_return_account_id.id or False
+            account_id = company.default_accrued_revenue_return_account_id.id\
+                or False
         return account_id
 
     @api.model
@@ -53,7 +55,6 @@ class AccountCutoff(models.Model):
         return super(AccountCutoff, self)._prepare_lines(line, account_mapping)
 
     def _prepare_lines_return(self, line, account_mapping):
-        company_currency_id = self.company_id.currency_id
         price_unit = line.price_unit_on_quant
         quantity = line.quantity
         amount = price_unit * quantity
