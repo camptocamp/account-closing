@@ -28,7 +28,8 @@ class AccountCutOff(models.Model):
         type = self.env.context.get('default_type')
         company = self.env.user.company_id
         if type == 'accrued_expense':
-            account_id = company.default_accrued_expense_prepayment_account_id.id or False
+            account_id = company\
+                .default_accrued_expense_prepayment_account_id.id or False
         return account_id
 
     @api.model

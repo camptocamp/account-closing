@@ -92,9 +92,9 @@ class AccountCutoff(models.Model):
         copy=False)
     auto_reverse = fields.Boolean(
         'Auto Reverse',
-        help="Automatically reverse created move on following day. Use this if "
-             "you accrue a value end of period that you want to reverse begin "
-             "of next period")
+        help="Automatically reverse created move on following day. Use this "
+             "if you accrue a value end of period that you want to reverse "
+             "begin of next period")
     move_reversal_id = fields.Many2one(
         'account.move', string='Cut-off Journal Entry Reversal', readonly=True,
         copy=False)
@@ -207,7 +207,8 @@ class AccountCutoff(models.Model):
             movelines_to_create.append((0, 0, {
                 'account_id': self.cutoff_account_id.id,
                 'name': move_label,
-                'debit': counterpart_amount < 0 and counterpart_amount * -1 or 0,
+                'debit': (counterpart_amount < 0 and
+                          counterpart_amount * -1 or 0),
                 'credit': counterpart_amount >= 0 and counterpart_amount or 0,
                 'analytic_account_id': False,
             }))
