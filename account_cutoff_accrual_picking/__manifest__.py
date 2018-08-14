@@ -31,6 +31,7 @@
     'website': 'http://www.akretion.com',
     'depends': ['account_cutoff_accrual_base', 'purchase', 'sale_stock'],
     'data': [
+        'security/ir.model.access.csv',
         'views/account_cutoff_view.xml',
         'data/ir_cron.xml',
     ],

@@ -80,9 +80,8 @@ class AccountCutoff(models.Model):
         accrual_account_id = self._get_account_mapping().get(
             account_id, account_id)
 
-        received_qty = line.qty_received
-
         if self.type == 'accrued_expense':
+            received_qty = line.qty_received
             # Processing purchase order line
             analytic_account_id = line.account_analytic_id.id
             price_unit = line.price_unit
@@ -100,6 +99,7 @@ class AccountCutoff(models.Model):
                     received_qty -= move.product_uom_qty
 
         elif self.type == 'accrued_revenue':
+            received_qty = line.qty_delivered
             # Processing sale order line
             analytic_account_id = line.order_id.project_id.id or False
             price_unit = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
