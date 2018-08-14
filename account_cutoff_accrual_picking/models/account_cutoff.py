@@ -213,11 +213,11 @@ class AccountCutoffLine(models.Model):
     )
     invoiced_qty = fields.Float(
         'Invoiced Quantity',
-        compute='_get_invoiced_qty',
+        compute='_compute_invoiced_qty',
         store=True)
 
     @api.depends('invoiced_qty_ids.quantity')
-    def _get_invoiced_qty(self):
+    def _compute_invoiced_qty(self):
         for rec in self:
             rec.invoiced_qty = sum(rec.invoiced_qty_ids.mapped('quantity'))
 
