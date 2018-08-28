@@ -54,11 +54,13 @@ class TestAccountCutoffAccrualPicking(TransactionCase):
             'pricelist_id': self.env.ref('product.list0').id,
         })
 
-        cutoff = self.env['account.cutoff'].create({
-            'type': 'accrued_revenue',
-            'company_id': 1,
-            'cutoff_date': datetime.today() + relativedelta(days=+15),
-        })
+        type = 'accrued_revenue'
+        cutoff = self.env['account.cutoff'].with_context(default_type=type)\
+            .create({
+                'type': type,
+                'company_id': 1,
+                'cutoff_date': datetime.today() + relativedelta(days=+15),
+            })
         cutoff.get_lines()
         self.assertTrue(
             len(cutoff.line_ids) == 0, 'There should be no so line to process')
@@ -110,11 +112,13 @@ class TestAccountCutoffAccrualPicking(TransactionCase):
                 }) for p in self.products],
         })
 
-        cutoff = self.env['account.cutoff'].create({
-            'type': 'accrued_expense',
-            'company_id': 1,
-            'cutoff_date': datetime.today() + relativedelta(days=+15),
-        })
+        type = 'accrued_expense'
+        cutoff = self.env['account.cutoff'].with_context(default_type=type)\
+            .create({
+                'type': type,
+                'company_id': 1,
+                'cutoff_date': datetime.today() + relativedelta(days=+15),
+            })
         cutoff.get_lines()
         self.assertTrue(
             len(cutoff.line_ids) == 0, 'There should be no po line to process')
