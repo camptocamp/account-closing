@@ -49,12 +49,11 @@ class AccountCutoff(models.Model):
             label = _('Accrued Revenue Returns')
         self.move_label = label
 
-    def _prepare_lines(self, line, account_mapping):
-        if self.type in ('accrued_expense_return', 'accrued_revenue_return'):
-            return self._prepare_lines_return(line, account_mapping)
-        return super(AccountCutoff, self)._prepare_lines(line, account_mapping)
+    def _prepare_lines_return(self, line):
+        assert self.type in ('accrued_expense_return',
+                             'accrued_revenue_return'),\
+            "The field 'type' has a wrong value"
 
-    def _prepare_lines_return(self, line, account_mapping):
         price_unit = line.price_unit_on_quant
         quantity = line.quantity
         amount = price_unit * quantity
@@ -85,6 +84,8 @@ class AccountCutoff(models.Model):
             amount = amount * -1
 
         # we use account mapping here
+        account_mapping = self.env['account.cutoff.mapping']._get_mapping_dict(
+            self.company_id.id, self.type)
         accrual_account_id = account_mapping.get(account_id, account_id)
 
         res = {
@@ -100,8 +101,9 @@ class AccountCutoff(models.Model):
         }
         return res
 
-    def get_lines_for_cutoff(self):
+    def get_lines(self):
         """ Get inventory based on return location """
+        lines = super(AccountCutoff, self).get_lines()
         domain = [('quantity', '>', 0)]
         if self.type == 'accrued_revenue_return':
             # customer returns
@@ -112,8 +114,11 @@ class AccountCutoff(models.Model):
             domain += [('location_id.accrued_supplier_return', '=', True)]
             lines = self.env['stock.history'].search(domain)
         else:
-            lines = super(AccountCutoff, self).get_lines_for_cutoff()
-        return lines
+            return lines
+
+        for line in lines:
+            self.env['account.cutoff.line'].create(
+                self._prepare_lines_return(line))
 
     @api.model
     def _cron_cutoff_expense(self):
