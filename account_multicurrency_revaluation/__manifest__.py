@@ -10,6 +10,7 @@
  "license": 'AGPL-3',
  "depends": [
      "account_reversal",
+     "currency_monthly_rate",
  ],
  "demo": [
      "demo/account_demo.xml",
