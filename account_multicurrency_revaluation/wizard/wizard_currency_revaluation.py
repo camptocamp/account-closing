@@ -127,7 +127,6 @@ class WizardCurrencyRevaluation(models.TransientModel):
         context = self.env.context
 
         currency_obj = self.env['res.currency']
-        company = form.journal_id.company_id or form.env.user.company_id
 
         # Compute unrealized gain loss
         ctx_rate = context.copy()

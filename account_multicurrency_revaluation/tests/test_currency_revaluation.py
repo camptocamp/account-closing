@@ -178,7 +178,7 @@ class TestCurrencyRevaluation(SavepointCase):
 
             label = reval_line.name
             rate = label[label.find(',') + 1:label.find(']')].strip()
-            self.assertEqual(rate, '2.5')
+            self.assertAlmostEqual(rate, '2.5')
 
             if reval_line.account_id.name == 'Account Liquidity USD':
                 self.assertFalse(reval_line.partner_id)
