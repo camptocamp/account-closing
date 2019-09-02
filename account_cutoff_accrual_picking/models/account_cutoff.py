@@ -89,8 +89,15 @@ class AccountCutoff(models.Model):
             taxes = fpos.map_tax(taxes)
             # The quantity received on PO line must be deducted of all moves
             # done after the cutoff date.
+            # As line.moves_ids.date is a Datetime and self.cutoff_date a Date
+            # we cast both fields to a Date object to avoid filtering a
+            # move that would be on the same day and ensure we filter moves
+            # with a Date that is really posterior to the cutoff date
+            from_string = fields.Date.from_string
             moves_after = line.move_ids.filtered(
-                lambda r: r.state == 'done' and r.date > self.cutoff_date)
+                lambda r: r.state == 'done'
+                and from_string(r.date) > from_string(self.cutoff_date)
+            )
             for move in moves_after:
                 if move.product_uom != line.product_uom:
                     received_qty -= move.product_uom._compute_quantity(
