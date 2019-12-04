@@ -2,7 +2,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 
-from odoo import _, api, fields, models
+from odoo import _, fields, models
 from odoo.exceptions import ValidationError
 
 
@@ -22,7 +22,6 @@ class UnrealizedCurrencyReportPrinter(models.TransientModel):
         account_ids = account_model.search([("currency_revaluation", "=", True)]).ids
         return [(6, 0, account_ids)]
 
-    @api.multi
     def print_report(self, data):
         """
         Show the report
