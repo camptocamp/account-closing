@@ -49,7 +49,6 @@ class AccountCutoff(models.Model):
         )
     ]
 
-    @api.multi
     @api.constrains("start_date", "end_date", "forecast")
     def _check_start_end_dates(self):
         for prepaid in self:
@@ -73,7 +72,6 @@ class AccountCutoff(models.Model):
             }
         }
 
-    @api.multi
     def _prepare_prepaid_lines(self, aml, mapping):
         self.ensure_one()
         start_date_dt = fields.Date.from_string(aml.start_date)
@@ -123,7 +121,6 @@ class AccountCutoff(models.Model):
         }
         return res
 
-    @api.multi
     def get_prepaid_lines(self):
         self.ensure_one()
         aml_obj = self.env["account.move.line"]
@@ -187,9 +184,6 @@ class AccountCutoffLine(models.Model):
     )
     move_date = fields.Date(
         related="move_line_id.date", string="Account Move Date", readonly=True
-    )
-    invoice_id = fields.Many2one(
-        related="move_line_id.invoice_id", string="Invoice", readonly=True
     )
     start_date = fields.Date(readonly=True)
     end_date = fields.Date(readonly=True)
