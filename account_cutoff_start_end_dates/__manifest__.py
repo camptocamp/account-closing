@@ -13,6 +13,7 @@
     "maintainers": ["alexis-via"],
     "website": "https://github.com/OCA/account-closing",
     "depends": ["account_cutoff_base", "account_invoice_start_end_dates"],
+    "external_dependencies": {"python": ["openupgradelib"]},
     "data": ["views/account_cutoff.xml"],
     "images": [
         "images/prepaid_revenue_draft.jpg",
@@ -21,4 +22,5 @@
     ],
     "installable": True,
     "application": True,
+    "pre_init_hook": "module_migration",
 }
