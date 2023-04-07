@@ -2,19 +2,22 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl)
 
 from odoo import fields
-from odoo.tests import tagged
 
 from odoo.addons.account_tax_change.tests.common import AccountTaxChangeCommon
+from odoo.addons.account_invoice_start_end_dates_tax_change.wizards import (
+    account_move_apply_tax_change as wiz
+)
 
 
-@tagged("post_install", "-at_install")
 class TestAccountTaxChange(AccountTaxChangeCommon):
+    at_install = False
+    post_install = True
+
     @classmethod
     def _setup_invoice_dates(cls, change_date, start_date, end_date):
-        start_date = fields.Date.to_date(start_date)
-        end_date = fields.Date.to_date(end_date)
-        tax_change_date = fields.Date.to_date(change_date)
-        cls.tax_change_a2b.date = tax_change_date
+        start_date = fields.Date.from_string(start_date)
+        end_date = fields.Date.from_string(end_date)
+        cls.tax_change_a2b.date = change_date
         cls.invoice_tax_a.invoice_line_ids.write(
             {"start_date": start_date, "end_date": end_date}
         )
@@ -30,7 +33,7 @@ class TestAccountTaxChange(AccountTaxChangeCommon):
             end_date="2023-03-31",
         )
         invoice = self.invoice_tax_a
-        old_taxes = invoice.invoice_line_ids.tax_ids
+        old_taxes = invoice.invoice_line_ids.invoice_line_tax_ids
         old_amount_tax = invoice.amount_tax
         old_price_unit = invoice.invoice_line_ids.price_unit
         self.assertEqual(len(invoice.invoice_line_ids), 1)
@@ -39,27 +42,27 @@ class TestAccountTaxChange(AccountTaxChangeCommon):
         line_from_start = invoice.invoice_line_ids.filtered(
             lambda l: l.end_date == self.tax_change_a2b.date
         )
-        self.assertEqual(line_from_start.tax_ids, old_taxes)
+        self.assertEqual(line_from_start.invoice_line_tax_ids, old_taxes)
         line_from_change = invoice.invoice_line_ids.filtered(
             lambda l: l.start_date == self.tax_change_a2b.date
         )
-        new_taxes = line_from_change.tax_ids
+        new_taxes = line_from_change.invoice_line_tax_ids
         new_amount_tax = invoice.amount_tax
         self.assertEqual(
             line_from_start.price_unit + line_from_change.price_unit, old_price_unit
         )
         self.assertNotEqual(old_taxes, new_taxes)
-        self.assertEqual(line_from_change.tax_ids, new_taxes)
+        self.assertEqual(line_from_change.invoice_line_tax_ids, new_taxes)
         self.assertEqual(new_taxes, self.tax_sale_b)
         self.assertNotEqual(old_amount_tax, new_amount_tax)
 
     def test_apply_tax_change_no_change(self):
         """Change tax A to B on an invoice using already tax B."""
         invoice = self.invoice_tax_b
-        old_taxes = invoice.invoice_line_ids.tax_ids
+        old_taxes = invoice.invoice_line_ids.invoice_line_tax_ids
         old_amount_tax = invoice.amount_tax
         self.apply_tax_change(self.tax_change_a2b, invoice)
-        new_taxes = invoice.invoice_line_ids.tax_ids
+        new_taxes = invoice.invoice_line_ids.invoice_line_tax_ids
         new_amount_tax = invoice.amount_tax
         self.assertEqual(old_taxes, new_taxes, self.tax_sale_b)
         self.assertEqual(old_amount_tax, new_amount_tax)
@@ -71,13 +74,14 @@ class TestAccountTaxChange(AccountTaxChangeCommon):
             start_date="2024-01-01",
             end_date="2024-02-29",
         )
-        new_tax_change_date = fields.Date.subtract(self.tax_change_a2b.date, months=3)
-        self.tax_change_a2b.date = new_tax_change_date
+        tax_change_date = fields.Date.from_string(self.tax_change_a2b.date)
+        new_tax_change_date = wiz.date_subtract(tax_change_date, months=3)
+        self.tax_change_a2b.date = fields.Date.to_string(new_tax_change_date)
         invoice = self.invoice_tax_a
-        old_taxes = invoice.invoice_line_ids.tax_ids
+        old_taxes = invoice.invoice_line_ids.invoice_line_tax_ids
         old_amount_tax = invoice.amount_tax
         self.apply_tax_change(self.tax_change_a2b, invoice)
-        new_taxes = invoice.invoice_line_ids.tax_ids
+        new_taxes = invoice.invoice_line_ids.invoice_line_tax_ids
         new_amount_tax = invoice.amount_tax
         self.assertEqual(old_taxes, new_taxes, self.tax_sale_b)
         self.assertEqual(old_amount_tax, new_amount_tax)
@@ -90,7 +94,7 @@ class TestAccountTaxChange(AccountTaxChangeCommon):
             end_date="2024-02-29",
         )
         invoice = self.invoice_tax_a
-        old_taxes = invoice.invoice_line_ids.tax_ids
+        old_taxes = invoice.invoice_line_ids.invoice_line_tax_ids
         old_amount_tax = invoice.amount_tax
         old_price_unit = invoice.invoice_line_ids.price_unit
         self.assertEqual(len(invoice.invoice_line_ids), 1)
@@ -99,17 +103,17 @@ class TestAccountTaxChange(AccountTaxChangeCommon):
         line_from_start = invoice.invoice_line_ids.filtered(
             lambda l: l.end_date == self.tax_change_a2b.date
         )
-        self.assertEqual(line_from_start.tax_ids, old_taxes)
+        self.assertEqual(line_from_start.invoice_line_tax_ids, old_taxes)
         line_from_change = invoice.invoice_line_ids.filtered(
             lambda l: l.start_date == self.tax_change_a2b.date
         )
-        new_taxes = line_from_change.tax_ids
+        new_taxes = line_from_change.invoice_line_tax_ids
         new_amount_tax = invoice.amount_tax
         self.assertEqual(
             line_from_start.price_unit + line_from_change.price_unit, old_price_unit
         )
         self.assertNotEqual(old_taxes, new_taxes)
-        self.assertEqual(line_from_change.tax_ids, new_taxes)
+        self.assertEqual(line_from_change.invoice_line_tax_ids, new_taxes)
         self.assertEqual(new_taxes, self.tax_sale_b)
         self.assertNotEqual(old_amount_tax, new_amount_tax)
 
@@ -121,7 +125,7 @@ class TestAccountTaxChange(AccountTaxChangeCommon):
             end_date="2024-12-31",
         )
         invoice = self.invoice_tax_a
-        old_taxes = invoice.invoice_line_ids.tax_ids
+        old_taxes = invoice.invoice_line_ids.invoice_line_tax_ids
         old_amount_tax = invoice.amount_tax
         old_price_unit = invoice.invoice_line_ids.price_unit
         self.assertEqual(len(invoice.invoice_line_ids), 1)
@@ -130,17 +134,17 @@ class TestAccountTaxChange(AccountTaxChangeCommon):
         line_from_start = invoice.invoice_line_ids.filtered(
             lambda l: l.end_date == self.tax_change_a2b.date
         )
-        self.assertEqual(line_from_start.tax_ids, old_taxes)
+        self.assertEqual(line_from_start.invoice_line_tax_ids, old_taxes)
         line_from_change = invoice.invoice_line_ids.filtered(
             lambda l: l.start_date == self.tax_change_a2b.date
         )
-        new_taxes = line_from_change.tax_ids
+        new_taxes = line_from_change.invoice_line_tax_ids
         new_amount_tax = invoice.amount_tax
         self.assertEqual(
             line_from_start.price_unit + line_from_change.price_unit, old_price_unit
         )
         self.assertNotEqual(old_taxes, new_taxes)
-        self.assertEqual(line_from_change.tax_ids, new_taxes)
+        self.assertEqual(line_from_change.invoice_line_tax_ids, new_taxes)
         self.assertEqual(new_taxes, self.tax_sale_b)
         self.assertNotEqual(old_amount_tax, new_amount_tax)
 
@@ -152,7 +156,7 @@ class TestAccountTaxChange(AccountTaxChangeCommon):
             end_date="2023-12-31",
         )
         invoice = self.invoice_tax_a
-        old_taxes = invoice.invoice_line_ids.tax_ids
+        old_taxes = invoice.invoice_line_ids.invoice_line_tax_ids
         old_amount_tax = invoice.amount_tax
         old_price_unit = invoice.invoice_line_ids.price_unit
         self.assertEqual(len(invoice.invoice_line_ids), 1)
@@ -161,16 +165,16 @@ class TestAccountTaxChange(AccountTaxChangeCommon):
         line_from_start = invoice.invoice_line_ids.filtered(
             lambda l: l.end_date == self.tax_change_a2b.date
         )
-        self.assertEqual(line_from_start.tax_ids, old_taxes)
+        self.assertEqual(line_from_start.invoice_line_tax_ids, old_taxes)
         line_from_change = invoice.invoice_line_ids.filtered(
             lambda l: l.start_date == self.tax_change_a2b.date
         )
-        new_taxes = line_from_change.tax_ids
+        new_taxes = line_from_change.invoice_line_tax_ids
         new_amount_tax = invoice.amount_tax
         self.assertEqual(
             line_from_start.price_unit + line_from_change.price_unit, old_price_unit
         )
         self.assertNotEqual(old_taxes, new_taxes)
-        self.assertEqual(line_from_change.tax_ids, new_taxes)
+        self.assertEqual(line_from_change.invoice_line_tax_ids, new_taxes)
         self.assertEqual(new_taxes, self.tax_sale_b)
         self.assertNotEqual(old_amount_tax, new_amount_tax)
