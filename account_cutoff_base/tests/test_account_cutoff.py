@@ -208,6 +208,16 @@ class TestAccountCutoff(AccountCutoffCommon):
             cutoff.create_move()
 
     def test_create_move_successfully_generates_journal_entry(self):
+        analytic_plan = self.env["account.analytic.plan"].create(
+            {"name": "Cutoff test"}
+        )
+        analytic_account = self.env["account.analytic.account"].create(
+            {
+                "name": "Cutoff test",
+                "plan_id": analytic_plan.id,
+                "company_id": self.company.id,
+            }
+        )
         cutoff = self.env["account.cutoff"].create(
             {
                 "company_id": self.company.id,
@@ -219,7 +229,7 @@ class TestAccountCutoff(AccountCutoffCommon):
                             "cutoff_account_id": self.account_expense.id,
                             "partner_id": self.partner.id,
                             "cutoff_amount": 100.0,
-                            "analytic_distribution": {"1": 100},
+                            "analytic_distribution": {str(analytic_account.id): 100},
                             "tax_line_ids": [
                                 Command.create(
                                     {
