@@ -1,8 +1,11 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
+from odoo.tests import tagged
+
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 
 
+@tagged("-at_install", "post_install")
 class AccountCutoffCommon(AccountTestInvoicingCommon):
     @classmethod
     def setUpClass(cls):
